@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>EduGenie - AI Learning Assistant</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='style.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="app">
+
+    <header class="hero">
+
+        <div class="hero-content">
+
+            <div class="badge">
+                ✨ AI-Powered Learning Assistant
+            </div>
+
+            <h1>
+                EduGenie
+            </h1>
+
+            <p>
+                Learn smarter with Google Gemini powered
+                explanations, Q&A, quizzes, summaries,
+                and personalized learning paths.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <section class="card">
+
+            <h2>
+                What would you like to learn?
+            </h2>
+
+            <p class="subtitle">
+                Select a learning task and enter your content.
+            </p>
+
+
+            <div class="form-group">
+
+                <label for="task">
+                    Learning Task
+                </label>
+
+                <select id="task">
+
+                    <option value="qa">
+                        Question & Answer
+                    </option>
+
+                    <option value="explain">
+                        Explain a Concept
+                    </option>
+
+                    <option value="quiz">
+                        Generate Quiz
+                    </option>
+
+                    <option value="summarize">
+                        Summarize Text
+                    </option>
+
+                    <option value="learning_path">
+                        Recommend Learning Path
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div id="standard-input">
+
+                <div class="form-group">
+
+                    <label id="input-label" for="user-input">
+                        Your Question
+                    </label>
+
+                    <textarea
+                        id="user-input"
+                        rows="8"
+                        placeholder="Ask your question here..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="quiz-options"
+                class="hidden"
+            >
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="quiz-count">
+                            Number of Questions
+                        </label>
+
+                        <input
+                            id="quiz-count"
+                            type="number"
+                            min="1"
+                            max="10"
+                            value="3"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="quiz-difficulty">
+                            Difficulty
+                        </label>
+
+                        <select id="quiz-difficulty">
+
+                            <option value="easy">
+                                Easy
+                            </option>
+
+                            <option value="medium" selected>
+                                Medium
+                            </option>
+
+                            <option value="hard">
+                                Hard
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="learning-options"
+                class="hidden"
+            >
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="current-level">
+                            Current Level
+                        </label>
+
+                        <select id="current-level">
+
+                            <option value="beginner">
+                                Beginner
+                            </option>
+
+                            <option value="intermediate">
+                                Intermediate
+                            </option>
+
+                            <option value="advanced">
+                                Advanced
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="hours">
+                            Hours Per Week
+                        </label>
+
+                        <input
+                            id="hours"
+                            type="number"
+                            min="1"
+                            max="168"
+                            value="5"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="goal">
+                        Learning Goal
+                    </label>
+
+                    <input
+                        id="goal"
+                        type="text"
+                        value="Understand the topic"
+                        placeholder="Example: Become job-ready"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="submit-button"
+                class="primary-button"
+            >
+
+                <span id="button-text">
+                    Generate Answer
+                </span>
+
+                <span
+                    id="button-loader"
+                    class="loader hidden"
+                ></span>
+
+            </button>
+
+        </section>
+
+
+        <section
+            id="result-card"
+            class="card result-card hidden"
+        >
+
+            <div class="result-header">
+
+                <h2>
+                    EduGenie Result
+                </h2>
+
+                <button
+                    id="copy-button"
+                    class="secondary-button"
+                >
+                    Copy
+                </button>
+
+            </div>
+
+
+            <div id="result">
+            </div>
+
+        </section>
+
+
+        <section
+            id="error-card"
+            class="card error-card hidden"
+        >
+
+            <h3>
+                Something went wrong
+            </h3>
+
+            <p id="error-message"></p>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            EduGenie &copy; 2026 |
+            Google Gemini Powered Learning Assistant
+        </p>
+
+    </footer>
+
+</div>
+
+
+<script>
+
+const task = document.getElementById("task");
+
+const standardInput =
+    document.getElementById("standard-input");
+
+const userInput =
+    document.getElementById("user-input");
+
+const inputLabel =
+    document.getElementById("input-label");
+
+const quizOptions =
+    document.getElementById("quiz-options");
+
+const learningOptions =
+    document.getElementById("learning-options");
+
+const submitButton =
+    document.getElementById("submit-button");
+
+const buttonText =
+    document.getElementById("button-text");
+
+const buttonLoader =
+    document.getElementById("button-loader");
+
+const resultCard =
+    document.getElementById("result-card");
+
+const result =
+    document.getElementById("result");
+
+const errorCard =
+    document.getElementById("error-card");
+
+const errorMessage =
+    document.getElementById("error-message");
+
+const copyButton =
+    document.getElementById("copy-button");
+
+
+function escapeHtml(value) {
+
+    const div = document.createElement("div");
+
+    div.textContent = value ?? "";
+
+    return div.innerHTML;
+}
+
+
+function updateInterface() {
+
+    const selectedTask = task.value;
+
+    quizOptions.classList.add("hidden");
+
+    learningOptions.classList.add("hidden");
+
+    standardInput.classList.remove("hidden");
+
+
+    if (selectedTask === "qa") {
+
+        inputLabel.textContent =
+            "Your Question";
+
+        userInput.placeholder =
+            "Example: What is machine learning?";
+
+    }
+
+
+    else if (selectedTask === "explain") {
+
+        inputLabel.textContent =
+            "Concept to Explain";
+
+        userInput.placeholder =
+            "Example: Explain neural networks";
+
+    }
+
+
+    else if (selectedTask === "summarize") {
+
+        inputLabel.textContent =
+            "Text to Summarize";
+
+        userInput.placeholder =
+            "Paste the text you want EduGenie to summarize...";
+
+    }
+
+
+    else if (selectedTask === "quiz") {
+
+        inputLabel.textContent =
+            "Quiz Topic";
+
+        userInput.placeholder =
+            "Example: Python programming";
+
+        quizOptions.classList.remove("hidden");
+
+    }
+
+
+    else if (selectedTask === "learning_path") {
+
+        inputLabel.textContent =
+            "Learning Topic";
+
+        userInput.placeholder =
+            "Example: Generative AI";
+
+        learningOptions.classList.remove("hidden");
+
+    }
+
+}
+
+
+function setLoading(loading) {
+
+    submitButton.disabled = loading;
+
+    buttonLoader.classList.toggle(
+        "hidden",
+        !loading
+    );
+
+    buttonText.textContent = loading
+        ? "Generating..."
+        : "Generate Answer";
+
+}
+
+
+function showError(message) {
+
+    errorMessage.textContent = message;
+
+    errorCard.classList.remove("hidden");
+
+}
+
+
+function hideError() {
+
+    errorCard.classList.add("hidden");
+
+}
+
+
+function showResult(html) {
+
+    result.innerHTML = html;
+
+    resultCard.classList.remove("hidden");
+
+}
+
+
+function renderText(text) {
+
+    const escaped = escapeHtml(text);
+
+    return `
+        <div class="text-result">
+            <pre>${escaped}</pre>
+        </div>
+    `;
+
+}
+
+
+function renderQuiz(data) {
+
+    let html = "";
+
+    html += `
+        <div class="quiz-title">
+            <h3>${escapeHtml(data.topic)}</h3>
+            <span class="difficulty">
+                ${escapeHtml(data.difficulty)}
+            </span>
+        </div>
+    `;
+
+
+    data.questions.forEach(
+        (question, index) => {
+
+            html += `
+                <div class="quiz-question">
+
+                    <h3>
+                        ${index + 1}.
+                        ${escapeHtml(question.question)}
+                    </h3>
+
+                    <div class="quiz-options">
+            `;
+
+
+            question.options.forEach(
+                option => {
+
+                    html += `
+                        <button
+                            class="quiz-option"
+                            data-answer="${escapeHtml(option)}"
+                        >
+                            ${escapeHtml(option)}
+                        </button>
+                    `;
+
+                }
+            );
+
+
+            html += `
+                    </div>
+
+                    <div
+                        class="quiz-feedback hidden"
+                    ></div>
+
+                </div>
+            `;
+
+        }
+    );
+
+
+    showResult(html);
+
+
+    document
+        .querySelectorAll(".quiz-option")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const question =
+                        button.closest(".quiz-question");
+
+                    const feedback =
+                        question.querySelector(
+                            ".quiz-feedback"
+                        );
+
+                    const selected =
+                        button.dataset.answer;
+
+                    const currentQuestion =
+                        data.questions[
+                            Array.from(
+                                document.querySelectorAll(
+                                    ".quiz-question"
+                                )
+                            ).indexOf(question)
+                        ];
+
+                    question
+                        .querySelectorAll(".quiz-option")
+                        .forEach(option => {
+                            option.disabled = true;
+                        });
+
+
+                    if (
+                        selected ===
+                        currentQuestion.correct_answer
+                    ) {
+
+                        button.classList.add("correct");
+
+                        feedback.innerHTML = `
+                            <strong>Correct!</strong>
+                            ${escapeHtml(
+                                currentQuestion.explanation
+                            )}
+                        `;
+
+                    }
+
+                    else {
+
+                        button.classList.add("incorrect");
+
+                        feedback.innerHTML = `
+                            <strong>Not quite.</strong>
+                            <br>
+                            Correct answer:
+                            <strong>
+                                ${escapeHtml(
+                                    currentQuestion.correct_answer
+                                )}
+                            </strong>
+                            <br><br>
+                            ${escapeHtml(
+                                currentQuestion.explanation
+                            )}
+                        `;
+
+                    }
+
+
+                    feedback.classList.remove(
+                        "hidden"
+                    );
+
+                }
+            );
+
+        });
+
+}
+
+
+function renderLearningPath(data) {
+
+    let html = "";
+
+    html += `
+        <div class="learning-header">
+
+            <h3>
+                ${escapeHtml(
+                    data.topic || "Learning Path"
+                )}
+            </h3>
+
+            <p>
+                ${escapeHtml(
+                    data.overview || ""
+                )}
+            </p>
+
+        </div>
+    `;
+
+
+    if (data.estimated_duration) {
+
+        html += `
+            <div class="info-box">
+
+                <strong>
+                    Estimated Duration:
+                </strong>
+
+                ${escapeHtml(
+                    data.estimated_duration
+                )}
+
+            </div>
+        `;
+
+    }
+
+
+    if (
+        Array.isArray(data.stages) &&
+        data.stages.length
+    ) {
+
+        html += `
+            <h3>
+                Learning Stages
+            </h3>
+
+            <div class="stages">
+        `;
+
+
+        data.stages.forEach(stage => {
+
+            html += `
+                <div class="stage">
+
+                    <h4>
+                        Stage ${escapeHtml(
+                            String(stage.stage)
+                        )}:
+                        ${escapeHtml(
+                            stage.title
+                        )}
+                    </h4>
+
+                    <p>
+                        <strong>
+                            Difficulty:
+                        </strong>
+                        ${escapeHtml(
+                            stage.difficulty
+                        )}
+                    </p>
+            `;
+
+
+            if (
+                Array.isArray(stage.concepts)
+            ) {
+
+                html += `
+                    <strong>Concepts</strong>
+                    <ul>
+                `;
+
+                stage.concepts.forEach(
+                    concept => {
+
+                        html += `
+                            <li>
+                                ${escapeHtml(
+                                    concept
+                                )}
+                            </li>
+                        `;
+
+                    }
+                );
+
+                html += "</ul>";
+
+            }
+
+
+            if (
+                Array.isArray(stage.activities)
+            ) {
+
+                html += `
+                    <strong>Activities</strong>
+                    <ul>
+                `;
+
+                stage.activities.forEach(
+                    activity => {
+
+                        html += `
+                            <li>
+                                ${escapeHtml(
+                                    activity
+                                )}
+                            </li>
+                        `;
+
+                    }
+                );
+
+                html += "</ul>";
+
+            }
+
+
+            if (stage.project) {
+
+                html += `
+                    <p>
+                        <strong>
+                            Project:
+                        </strong>
+                        ${escapeHtml(
+                            stage.project
+                        )}
+                    </p>
+                `;
+
+            }
+
+
+            html += `
+                </div>
+            `;
+
+        });
+
+
+        html += `
+            </div>
+        `;
+
+    }
+
+
+    if (
+        Array.isArray(data.weekly_schedule)
+    ) {
+
+        html += `
+            <h3>
+                Weekly Schedule
+            </h3>
+
+            <div class="schedule">
+        `;
+
+
+        data.weekly_schedule.forEach(
+            week => {
+
+                html += `
+                    <div class="week">
+
+                        <h4>
+                            Week
+                            ${escapeHtml(
+                                String(week.week)
+                            )}
+                        </h4>
+
+                        <p>
+                            ${escapeHtml(
+                                week.focus
+                            )}
+                        </p>
+
+                        <p>
+                            <strong>
+                                Study hours:
+                            </strong>
+                            ${escapeHtml(
+                                String(
+                                    week.study_hours
+                                )
+                            )}
+                        </p>
+                `;
+
+
+                if (
+                    Array.isArray(week.tasks)
+                ) {
+
+                    html += `
+                        <ul>
+                    `;
+
+                    week.tasks.forEach(
+                        task => {
+
+                            html += `
+                                <li>
+                                    ${escapeHtml(
+                                        task
+                                    )}
+                                </li>
+                            `;
+
+                        }
+                    );
+
+                    html += "</ul>";
+
+                }
+
+
+                html += `
+                    </div>
+                `;
+
+            }
+        );
+
+
+        html += `
+            </div>
+        `;
+
+    }
+
+
+    if (
+        Array.isArray(data.resources)
+    ) {
+
+        html += `
+            <h3>
+                Recommended Resources
+            </h3>
+
+            <div class="resources">
+        `;
+
+
+        data.resources.forEach(
+            resource => {
+
+                html += `
+                    <div class="resource">
+
+                       
